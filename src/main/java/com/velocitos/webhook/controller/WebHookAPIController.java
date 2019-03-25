@@ -37,6 +37,7 @@ public class WebHookAPIController {
      */
 
     @RequestMapping(value = "/api/v1/analytics", method = {RequestMethod.GET})
+    @ResponseBody
     public JSONObject getverify(@RequestParam(required = false) Map<String, String> allRequestParams,
                                 @RequestHeader(value = "X-healthfeed-trigger", required = false) final String event,
                                 @RequestHeader(value = "X-healthfeed-signature", required = false) final String signature,
