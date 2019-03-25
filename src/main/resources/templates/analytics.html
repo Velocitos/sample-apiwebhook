@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Webhook Callback</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<style type="text/css">
+    #analytics-pre{
+        background-color: #ececec;
+        padding: 20px;
+    }
+</style>
+<div class="container">
+    <h1>WebHook Requests</h1>
+    <p>Printing JSON as it is posted</p>
+
+    <pre id="analytics-pre"></pre>
+    <br>
+    <button type="button" class="btn btn-outline-primary" onclick="clearData()">Clear</button>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var baseUrl = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+
+    var counter = 1;
+    function setResponse(response) {
+        var scroll = false;
+        var formatedTest = "";
+            $.each(response,function(index, value){
+                formatedTest +=  "=================    Start: " + index + "    =================<br><br>";
+                try{
+                    formatedTest +=  JSON.stringify(JSON.parse(value), null, 2) + "<br>";
+                } catch (e) {
+                    formatedTest +=  value + "<br>";
+                }
+
+                formatedTest += "=================    End: " + index + "    =================<br>";
+                if(index > counter){
+                    counter = index;
+                    scroll = true;
+                }
+        });
+        console.log("Text: " + formatedTest);
+        //var formatedTest = JSON.stringify(response, null, 2);
+        $("#analytics-pre").html(formatedTest);
+        if(scroll){
+            window.scrollTo(0,document.body.scrollHeight);
+        }
+
+    }
+    function fetchdata(){
+        $.ajax({
+            url: baseUrl + "/webhookclient/api/v1/analytics/responses",
+            success: function (response) {
+                setResponse(response);
+            }
+        });
+    }
+    //window.setInterval(, 2000);
+    $(document).ready(function(){
+        setInterval(fetchdata,3000);
+    });
+    function clearData() {
+        $.ajax({
+            url: baseUrl + "/webhookclient/api/v1/analytics/clear",
+            success: function (response) {
+                counter = 1;
+                setResponse([]);
+            }
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>
